@@ -1,12 +1,13 @@
+<script setup lang="ts">
+
+</script>
+
 <template>
-  hello
+ Hello
 </template>
 
-<script>
-export default {
 
-}
-</script>
+
 
 <style>
 

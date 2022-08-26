@@ -1,0 +1,32 @@
+<script setup lang="ts">
+import { reactive } from 'vue'
+
+const userCredentials: {email: string, password: string} = reactive({
+    email: '',
+    password: ''
+})
+const login = () => {
+    $fetch('/api/Login', { method: 'post', body: userCredentials })
+        .then(response => {
+            console.log(response)
+            useState('access_token', () => response['access_token'])
+            const token = useCookie('access_token')
+            token.value = response['access_token']
+        })
+}
+</script>
+
+<template>
+  <h1>Login Page</h1>
+  <form @submit.prevent>
+        <input v-model="userCredentials.email" placeholder="Email Address" type="email" name="email" id="email">
+        <input v-model="userCredentials.password" placeholder="Password" type="password" name="password" id="password">
+        <button class="p-5 bg-blue-500 text-white rounded-sm mt-5 " @click="login">
+            Login
+        </button>
+  </form>
+</template>
+
+<style>
+
+</style>
