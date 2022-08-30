@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
+import {useAuthStore} from '@/stores/authStore'
+
+const authStore = useAuthStore()
 
 const userCredentials: {email: string, password: string} = reactive({
     email: '',
@@ -12,6 +15,7 @@ const login = () => {
             useState('access_token', () => response['access_token'])
             const token = useCookie('access_token')
             token.value = response['access_token']
+            authStore.setToken(response['access_token'])
         })
 }
 </script>
