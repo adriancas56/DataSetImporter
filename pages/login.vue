@@ -8,11 +8,9 @@ const userCredentials: {email: string, password: string} = reactive({
     email: '',
     password: ''
 })
-const login = () => {
-    $fetch('/api/Login', { method: 'post', body: userCredentials })
+const login = async () => {
+    await useFetch('/api/Login', { method: 'post', body: userCredentials })
         .then(response => {
-            console.log(response)
-            useState('access_token', () => response['access_token'])
             const token = useCookie('access_token')
             token.value = response['access_token']
             authStore.setToken(response['access_token'])
@@ -21,6 +19,8 @@ const login = () => {
 </script>
 
 <template>
+    <div>
+
   <h1>Login Page</h1>
   <form @submit.prevent>
         <input v-model="userCredentials.email" placeholder="Email Address" type="email" name="email" id="email">
@@ -29,6 +29,7 @@ const login = () => {
             Login
         </button>
   </form>
+        </div>
 </template>
 
 <style>

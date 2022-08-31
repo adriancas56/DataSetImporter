@@ -7,12 +7,11 @@ const { data } = useFetch('/api/Categories', {headers: {Authorization: `Bearer $
 
 </script>
 
+
 <template>
  {{data}}
 Category 
 </template>
-
-
 
 
 <style>
