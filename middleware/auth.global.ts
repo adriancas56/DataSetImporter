@@ -1,9 +1,7 @@
 import { useAuthStore } from "~~/stores/authStore"
 
 export default defineNuxtRouteMiddleware( (to, from) => {
-  const token = (useAuthStore().getToken)
-  console.log('hello')
-  // return navigateTo('/')
+  const token = useCookie('access_token').value
 
   if (to.path == '/login') {
     console.log('in login')

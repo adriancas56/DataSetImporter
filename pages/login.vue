@@ -12,8 +12,9 @@ const login = async () => {
     await useFetch('/api/Login', { method: 'post', body: userCredentials })
         .then(response => {
             const token = useCookie('access_token')
-            token.value = response['access_token']
-            authStore.setToken(response['access_token'])
+            token.value = response.data.value['access_token']
+            console.log(token.value)
+            console.log("response token should be here: ", useCookie('access_token').value)
         })
 }
 </script>
