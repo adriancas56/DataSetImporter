@@ -1,5 +1,11 @@
 export default defineEventHandler((event) => {
-    const token = event.req.headers.Authorization as string
-    console.log("In api")
-    return $fetch('http://localhost:5000/Categories', { headers: { Authorization: token} })
+    const token = event.req.headers.authorization as string
+
+    return $fetch('http://localhost:5000/Categories', { headers: { Authorization: token},
+        async onResponse({ request, response, options }) {
+            // Log response
+            console.log('[fetch response]', request, response)
+            response
+        }
+        })
 })
