@@ -5,7 +5,7 @@ export default defineEventHandler((event) => {
         async onResponse({ request, response, options }) {
             // Log response
             console.log('[fetch response]', request, response)
-            response
+            console.log(response.headers.get('set-cookie'))
         }
         })
 })
