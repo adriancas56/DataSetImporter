@@ -2,6 +2,10 @@ import { defineNuxtConfig } from 'nuxt'
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
+  
+  ssr: true,
+  target: 'server',
+  
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
@@ -25,4 +29,5 @@ export default defineNuxtConfig({
 colorMode: {
  classSuffix: ''
 },
+vite: {server: { proxy: { '/api/v1': { target: 'http://localhost:5000', changeOrigin: false } } }  }
 })
