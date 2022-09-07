@@ -4,16 +4,16 @@ export default defineNuxtRouteMiddleware( (to, from) => {
   const token = useCookie('access_token').value
   const isTokenValid: boolean = validateTokenExp(token)
 
-  if (to.path == '/login') {
+  if (to.path == '/unauthenticated') {
     return
   }
   else if (!token || token == undefined) {
     useState<string>('loginMessage', () => "Please login to access requested content.")
-    return '/login'
+    return '/unauthenticated'
   }
   else if (!isTokenValid) {
     useState<string>('loginMessage', () => "Your session has expired. Please login again.")
-    return '/login'
+    return '/unauthenticated'
   }
   
 })
