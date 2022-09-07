@@ -3,6 +3,7 @@
 const logout = () => {
     const token = useCookie('access_token')
     token.value = null
+    navigateTo('/login')
 }
 </script>
 

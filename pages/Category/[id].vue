@@ -1,13 +1,15 @@
 <script setup lang="ts">
-const route = useRoute()
-const { data: Category } = useFetch(`/api/Category?categoryId=${route.params.id}`)
-
+    import { ref, onMounted, onBeforeMount } from 'vue'
+    const category = ref()
+    const route = useRoute()
+    const response = await useFetch(`/api/Category?categoryId=${route.params.id}`)
+    onBeforeMount(async () => {
+        category.value = response.data
+    })
 </script>
 
 <template>
     <div>
-
-        {{Category}}
-        <br>
+        {{category}}
     </div>
 </template>

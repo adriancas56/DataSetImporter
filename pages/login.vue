@@ -1,27 +1,37 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
-import {useAuthStore} from '@/stores/authStore'
+import { reactive, ref } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+
+definePageMeta({
+  layout: 'unauthenticated'
+})
 
 const authStore = useAuthStore()
+const message = useState('loginMessage')
 
 const userCredentials: {email: string, password: string} = reactive({
     email: '',
     password: ''
 })
 const login = async () => {
-    await useFetch('/api/Login', { method: 'post', body: userCredentials })
+     await useFetch('/api/Login', { method: 'post', body: userCredentials })
         .then(response => {
+            console.log({ response })
             const token = useCookie('access_token')
             token.value = response.data.value['access_token']
-            console.log(token.value)
-            console.log("response token should be here: ", useCookie('access_token').value)
+            message.value = null
+            navigateTo('/')
+        }).catch(error => {
+            console.log(error)
         })
 }
 </script>
 
 <template>
     <div>
-
+       <div>
+        {{message}}
+        </div> 
   <h1>Login Page</h1>
   <form @submit.prevent>
         <input v-model="userCredentials.email" placeholder="Email Address" type="email" name="email" id="email">

@@ -1,19 +1,17 @@
 <script setup lang="ts">
-    console.log('Categories: ', useCookie('access_token').value)
-    // const { data, pending, error, refresh } = await useFetch('/api/Categories', {headers: {Authorization: `Bearer ${useCookie('access_token').value}`}})
-    const result = await apiFetch('/api/Categories', { headers: { Authorization: `Bearer ${useCookie('access_token').value}`}})
-    // .then(response => {
-    //     console.log(response)
-    // })
-    console.log('refresh', useState('acces_token_cookie').value)
-
+import { ref, onMounted, onBeforeMount } from 'vue'
+const categories = ref()
+onBeforeMount(async () => {
+    const response = await useFetch('/api/Categories', { headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
+    categories.value = response.data
+})
 
 </script>
 
 
 <template>
     <div>
-        {{result}}
+        {{categories}}
     </div>
 </template>
 
