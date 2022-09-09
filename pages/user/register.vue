@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { IUserRegistration } from '~~/types/IUserRegistration';
+import { IUser } from '~~/types/IUser'
 
-const userData: IUserRegistration = reactive({
+const userData: IUser = reactive({
     firstName: '',
     lastName: '',
     email: '',

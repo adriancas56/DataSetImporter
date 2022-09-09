@@ -16,7 +16,6 @@ const userCredentials: {email: string, password: string} = reactive({
 const login = async () => {
      await useFetch('/api/Login', { method: 'post', body: userCredentials })
         .then(response => {
-            console.log({ response })
             const token = useCookie('access_token')
             token.value = response.data.value['access_token']
             message.value = null
