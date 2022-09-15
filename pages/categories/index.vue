@@ -1,21 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeMount } from 'vue'
-const categories = ref()
-onBeforeMount(async () => {
-    const response = await useFetch('/api/Categories', { headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
-    categories.value = response.data
-})
-
+import { useCategoryStore} from '@/stores/categoryStore'
+const authStore = useCategoryStore()
+console.log(useCookie('token').value)
+const {data: categoriesData} = await useFetch('/api/Categories', { headers: { Authorization: `Bearer ${useCookie('token').value}` } })
+console.log(useCookie('access_token').value)
+authStore.setCategories(categoriesData)
 </script>
-
 
 <template>
     <div>
-        {{categories}}
+    <suspense>
+        <li v-for="category in authStore.getCategories">
+            {{category['name']}}
+            <NuxtLink :to="`/diagnostics/${category['name']}`">Diagnostics</NuxtLink>
+        </li>
+    </suspense>
     </div>
 </template>
 
-
-<style>
-
-</style>

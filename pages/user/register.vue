@@ -2,16 +2,17 @@
 import { reactive } from 'vue'
 import { IUser } from '~~/types/IUser'
 
-const userData: IUser = reactive({
+const getInitialUserData = (): IUser => ({
     firstName: '',
     lastName: '',
     email: '',
     password: ''
 })
-
+const userData: IUser = reactive(getInitialUserData())
 const registerUser = async () => {
     const { data, error } = await useFetch('/api/Users', { method: 'post', body: userData })
-    console.log(data, error)
+    Object.assign(userData, getInitialUserData())
+    navigateTo('/user')
 }
 
 </script>

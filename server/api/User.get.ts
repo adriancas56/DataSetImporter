@@ -1,5 +1,5 @@
 export default defineEventHandler((event) => {
-    const token = event.req.headers.authorization as string
-    const access_token = getCookie(event, 'access_token')
-    return $fetch('http://localhost:5000/User', { headers: { Authorization: `Bearer ${access_token}`}})
+    const access_token = event.req.headers.Authorization as string
+    console.log(access_token)
+    return $fetch('http://localhost:5000/User', { headers: { Authorization: access_token }})
 })

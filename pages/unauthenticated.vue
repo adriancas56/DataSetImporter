@@ -15,9 +15,9 @@ const userCredentials: {email: string, password: string} = reactive({
 })
 const login = async () => {
      await useFetch('/api/Login', { method: 'post', body: userCredentials })
-        .then(response => {
-            const token = useCookie('access_token')
-            token.value = response.data.value['access_token']
+         .then(response => {
+            const access_token = useCookie('access_token')
+            access_token.value = response.data.value['access_token']
             message.value = null
             navigateTo('/')
         }).catch(error => {
