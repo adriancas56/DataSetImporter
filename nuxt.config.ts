@@ -29,5 +29,5 @@ export default defineNuxtConfig({
 colorMode: {
  classSuffix: ''
 },
-vite: {server: { proxy: { '/api/v1': { target: 'http://localhost:5000', changeOrigin: false } } }  }
+  vite: { server: { proxy: { '/api/v1': { target: 'http://localhost:5000', changeOrigin: true } } } }
 })
