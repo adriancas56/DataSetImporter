@@ -7,11 +7,16 @@ const spreadsheet = ref(null)
 
 const createCategory = async () => {
     const formCategory = new FormData()
+    console.log(categoryName.value)
     formCategory.append('name', categoryName.value)
+    console.log(categoryDescription.value)
     formCategory.append('description', categoryDescription.value)
+    console.log(spreadsheet.value.files[0])
     formCategory.append('spreadsheet', spreadsheet.value.files[0])
-    await $fetch(`http://localhost:5000/Category`, { method: 'post', body: formCategory, headers: { Authorization: `Bearer ${useCookie('access_token')}`, 'Content-Type': 'multipart/form-data'}})
-
+    console.log(formCategory)
+    const response = await useFetch(`/importer-api/Category`, { initialCache: false, method: 'post', body: formCategory,
+    headers: { Authorization: `Bearer ${useCookie('access_token').value}`}})
+    console.log(response)
  }
 
 </script>

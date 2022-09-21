@@ -5,7 +5,6 @@ export default defineNuxtConfig({
   
   ssr: true,
   target: 'server',
-  
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
@@ -29,5 +28,9 @@ export default defineNuxtConfig({
 colorMode: {
  classSuffix: ''
 },
-  vite: { server: { proxy: { '/api/v1': { target: 'http://localhost:5000', changeOrigin: true } } } }
+  vite: { server: { proxy: { '/importer-api': {
+    target: 'http://localhost:5000',
+    changeOrigin: true,
+    rewrite: (path) => path.replace(/^\/importer-api/, '')
+  },} } } 
 })
