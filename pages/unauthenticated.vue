@@ -4,7 +4,7 @@
     definePageMeta({
       layout: 'unauthenticated'
     })
-    
+
     const message = ref<string>()
     const userCredentials: {email: string, password: string} = reactive({
         email: '',
@@ -32,7 +32,7 @@
         access_token.value = data.value['access_token']
         message.value = null
         navigateTo('/')
-    }
+    } 
     
     </script>
     
