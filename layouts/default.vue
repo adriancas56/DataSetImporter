@@ -1,9 +1,12 @@
 <template>
-  <div>
-    <NavBar/>
-    <main class="">
-      <slot />
+  <div class="flex">
+    <SideBar/>
+    <main>
+      <Header/>
+      <div class="bg-gray-200 p-6">
+        <slot />
+      </div>
+      <Footer/>
     </main>
-    <Footer/>
   </div>
 </template>
