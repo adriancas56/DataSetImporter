@@ -1,12 +1,12 @@
 <template>
   <div class="flex">
     <SideBar/>
-    <main>
+    <div class="flex flex-col grow">
       <Header/>
-      <div class="bg-gray-200 p-6">
+      <div class="bg-gray-200 p-6 h-full">
         <slot />
       </div>
       <Footer/>
-    </main>
+    </div>
   </div>
 </template>

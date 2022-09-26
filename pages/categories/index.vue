@@ -22,18 +22,18 @@ function next() {
 </script>
 
 <template>
-    <div>
-    <suspense>
-        <li v-for="category in authStore.getCategories">
-            {{category['name']}}
-            <NuxtLink :to="`/diagnostics/${category['name']}`">Diagnostics</NuxtLink>
-        </li>
-    </suspense>
-    <div>
-        {{users}}
-        <button @click="next">Next</button>
-        <button @click="previous">Previous</button>
-    </div>
+    <div class="h-fit ">
+      <suspense>
+          <li v-for="category in authStore.getCategories">
+              {{category['name']}}
+              <NuxtLink :to="`/diagnostics/${category['name']}`">Diagnostics</NuxtLink>
+          </li>
+      </suspense>
+      <div>
+          {{users}}
+          <button @click="next">Next</button>
+          <button @click="previous">Previous</button>
+      </div>
     </div>
 </template>
 

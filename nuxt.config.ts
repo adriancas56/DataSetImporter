@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   ssr: false,
   target: 'server',
   modules: [
+    'unplugin-icons/nuxt',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
     [
