@@ -4,6 +4,9 @@ import { IUser } from '~~/types/IUser'
 
 import { useUserStore} from '@/stores/userStore'
 
+definePageMeta({
+        title: "User"
+    })
 const userStore = useUserStore()
 const token = useCookie('access_token').value
 const { data: userData } = await useFetch('/api/User', { headers: { Authorization: `Bearer ${token}` } })

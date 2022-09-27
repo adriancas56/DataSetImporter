@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { useCategoryStore} from '@/stores/categoryStore'
+definePageMeta({
+        title: "Categories"
+    })
 const authStore = useCategoryStore()
 console.log(useCookie('token').value)
 const {data: categoriesData} = await useFetch('/api/Categories', { headers: { Authorization: `Bearer ${useCookie('token').value}` } })

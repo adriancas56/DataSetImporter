@@ -1,6 +1,9 @@
 <script setup lang="ts">
     import { ref } from 'vue';
         // import axios from '@nuxtjs/axios'
+    definePageMeta({
+        title: "Importer"
+    })
     const categoryName = ref('')
     const categoryDescription = ref('')
     const spreadsheet = ref(null)

@@ -1,15 +1,15 @@
 <script setup lang="ts">
+    definePageMeta({
+        title: "Home"
+    })
     const { data: categories } = await useFetch('/api/CategoriesLatest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
     
     const {data: diagnostics} = await useFetch('/api/DiagnosticsLatest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
 </script>
     
 <template>
-    <div class="bg-white p-8 rounded-2xl">
-        <h1 class="text-4xl">
-            Welcome
-        </h1>
-        <div>
+    <div>
+        <div class="bg-white p-8 mb-4 rounded-2xl">
             <h3>Categories</h3>
             <div v-for="category in categories" :key="category._id">
                 
@@ -24,7 +24,8 @@
                     </a>
                 </div>
             </div>
-
+        </div>
+        <div class="bg-white p-8 rounded-2xl">
             <h3>Diagnostics</h3>
             <div v-for="diagnostic in diagnostics" :key="diagnostic._id">
                 <div class="p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">

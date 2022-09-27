@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { useDiagnosticsStore } from '@/stores/diagnosticsStore'
+definePageMeta({
+        title: "Diagnostics"
+    })
 const diagnosticStore = useDiagnosticsStore()
 const {data: diagnosticsData} = await useFetch('/api/Diagnostics')
 diagnosticStore.setDiagnostics(diagnosticsData)
