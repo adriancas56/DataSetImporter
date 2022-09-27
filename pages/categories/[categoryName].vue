@@ -2,7 +2,8 @@
     import { ref, onMounted, onBeforeMount } from 'vue'
     const category = ref()
     const route = useRoute()
-    const response = await useFetch(`/api/Category?categoryId=${route.params.id}`)
+    console.log(route.params.categoryName)
+    const response = await useFetch(`/api/Category?categoryId=${route.params.categoryName}`)
     onBeforeMount(async () => {
         category.value = response.data
     })
@@ -10,6 +11,6 @@
 
 <template>
     <div>
-        {{category}}
+        {{response.data}}
     </div>
 </template>
