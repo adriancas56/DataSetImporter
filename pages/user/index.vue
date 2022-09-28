@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount } from 'vue'
-import { IUser } from '~~/types/IUser'
 
 import { useUserStore} from '@/stores/userStore'
 
@@ -13,7 +12,7 @@ const { data: userData } = await useFetch('/api/User', { headers: { Authorizatio
 userStore.setUser(userData)
 const userStuff2 = userStore.getUser
 
-const user: IUser= reactive({
+const user= reactive({
     firstName: '',
     lastName: '',
     email: '',

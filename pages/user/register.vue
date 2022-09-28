@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { IUser } from '~~/types/IUser'
 
-const getInitialUserData = (): IUser => ({
+const getInitialUserData = () => ({
     firstName: '',
     lastName: '',
     email: '',
     password: ''
 })
-const userData: IUser = reactive(getInitialUserData())
+const userData = reactive(getInitialUserData())
 const registerUser = async () => {
     const { data, error } = await useFetch('/api/Users', { method: 'post', body: userData })
     Object.assign(userData, getInitialUserData())
