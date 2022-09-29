@@ -1,20 +1,28 @@
 <script setup lang="ts">
-  import { ref, onMounted} from 'vue'
+import { ref, onMounted} from 'vue'
 definePageMeta({
-        title: "Categories"
-    })
+      title: "Categories"
+  })
 
 
     
-const page = ref(1);
+const page = ref(1)
+const limit = ref(6)
 const categories = ref<ICategoryItem[]>(null)
+const paginationMessage = ref('')
+const categoriesInDisplay = ref(0)
+
+const totalCategories = ref(0)
 const getCategoriesData = async() => {
-    const { data } = await useFetch<ICategoryItem[]>(`/api/CategoriesPage?page=${page.value}&limit=2`, { initialCache: false, headers: { Authorization: `Bearer ${useCookie('token').value}` } })
-    data.value.map((category: ICategoryItem) => {
-        category.creationTime = dateFormatter(category.creationTime)
-        category.modificationTime = dateFormatter(category.modificationTime)
-    })
-    categories.value = data.value
+  const { data } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Page/${page.value}/${limit.value}`, { initialCache: false, headers: { Authorization: `Bearer ${useCookie('token').value}` } })
+  const categoriesData = data.value['categories_data']
+  totalCategories.value = data.value['categories_total']
+  categoriesData.map((category: ICategoryItem) => {
+      category.creationTime = dateFormatter(category.creationTime)
+      category.modificationTime = dateFormatter(category.modificationTime)
+  })
+  categories.value = categoriesData
+  categoriesInDisplay.value = limit.value + (page.value - 1) * limit.value
 }
 
 onMounted(()=>{
@@ -23,25 +31,45 @@ onMounted(()=>{
 
 const searchCategory = ref('')
 const getSearchCategory = async () => {
-  console.log('helo')
-  const { data } = await useFetch<ICategoryItem[]>(`/api/CategoriesPage?page=${page.value}&limit=2`, { initialCache: false, headers: { Authorization: `Bearer ${useCookie('token').value}` } })
-    data.value.map((category: ICategoryItem) => {
-        category.creationTime = dateFormatter(category.creationTime)
-        category.modificationTime = dateFormatter(category.modificationTime)
-    })
-    categories.value = data.value
-    searchCategory.value = ''
-    console.log(categories.value)
-    console.log('end')
-} 
+  const { data, error } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Search/${searchCategory.value}`, { initialCache: false, headers: { Authorization: `Bearer ${useCookie('token').value}` } })
+  data.value.map((category: ICategoryItem) => {
+      category.creationTime = dateFormatter(category.creationTime)
+      category.modificationTime = dateFormatter(category.modificationTime)
+  })
+  categories.value = data.value
+  searchCategory.value = ''
+}
 
-function previous() {
+const previous = () => {
+  if (page.value <= 1){
+    return
+  }
   page.value--;
   getCategoriesData()
 }
 
-function next() {
+const next = () => {
+  if (totalCategories.value <= limit.value*page.value){
+    paginationMessage.value = 'You reached the limit of available Categories.'
+    return
+  }
   page.value++;
+  getCategoriesData()
+}
+
+const setSixPerPage = () => {
+  limit.value = 6
+  page.value = 1
+  getCategoriesData()
+}
+const setTwelvePerPage = () => {
+  limit.value = 12
+  page.value = 1
+  getCategoriesData()
+}
+const setTwentyFourPerPage = () => {
+  limit.value = 24
+  page.value = 1
   getCategoriesData()
 }
 </script>
@@ -64,6 +92,15 @@ function next() {
       <div class="bg-white p-8 mb-4 rounded-2xl">
             <h3 class="px-10 text-4xl font-medium text-gray-900">Categories</h3>
             <hr class="mx-10 mt-3 border-gray-400">
+            <div>
+              <p>
+                Categories per page: {{limit}}
+              </p>
+              <button @click="setSixPerPage">6</button>
+              <button @click="setTwelvePerPage">12</button>
+              <button @click="setTwentyFourPerPage">24</button>
+            </div>
+            <div>Displaying {{categoriesInDisplay}} of {{totalCategories}} Categories</div>
             <div class="px-10 py-6 grid grid-cols-3 gap-5">
                 <div v-for="category in categories" :key="category._id" class="p-6 bg-white rounded-lg border border-gray-200 shadow-md">
                     <NuxtLink :to="`/categories/${category.name}`">
@@ -76,8 +113,9 @@ function next() {
                         <p>Last Update: {{category.modificationTime}}</p>
                 </div>
             </div>
-            <button @click="previous">Previous</button>
-            <button @click="next">Next</button>
+            <button v-if="page > 1" @click="previous">Previous</button>
+            <button v-if="page * limit < totalCategories" @click="next">Next</button>
+            <span>Page: {{page}}</span>
         </div>
 
 

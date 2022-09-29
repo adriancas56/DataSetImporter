@@ -13,7 +13,7 @@
     
     const login = async () => {
         console.log(userCredentials)
-        const {data, error } = await useFetch('/importer-api/Login', { initialCache:false, method: 'post', body: userCredentials })
+        const {data, error } = await useFetch('/api/v2/Login', { initialCache:false, method: 'post', body: userCredentials })
     
         if (error.value) {
             const fetchErr = error.value.toString()

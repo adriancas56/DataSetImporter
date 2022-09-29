@@ -8,7 +8,7 @@
     const diagnostics = ref<IDiagnosticsItem[]>(null)
     
     const getCategoriesData = async() => {
-        const { data } = await useFetch<ICategoryItem[]>('/api/CategoriesLatest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
+        const { data } = await useFetch<ICategoryItem[]>('/api/v2/Categories/latest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
         
         data.value.map((category: ICategoryItem) => {
             category.creationTime = dateFormatter(category.creationTime)
@@ -18,7 +18,7 @@
     }
 
     const getDiagnosticsData = async () => {
-        const {data} = await useFetch<IDiagnosticsItem[]>('/api/DiagnosticsLatest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
+        const {data} = await useFetch<IDiagnosticsItem[]>('/api/v2/Diagnostics/latest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
         data.value.map((category: IDiagnosticsItem) => {
             category.creationTime = dateFormatter(category.creationTime)
         })

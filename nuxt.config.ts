@@ -28,9 +28,9 @@ export default defineNuxtConfig({
 colorMode: {
  classSuffix: ''
 },
-  vite: { server: { proxy: { '/importer-api': {
+  vite: { server: { proxy: { '/api/v2': {
     target: 'http://localhost:5000',
     changeOrigin: true,
-    rewrite: (path) => path.replace(/^\/importer-api/, '')
+    rewrite: (path) => path.replace(/^\/api\/v2/, '')
   },} } } 
 })
