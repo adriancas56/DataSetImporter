@@ -4,13 +4,11 @@ definePageMeta({
       title: "Categories"
   })
 
-
-    
 const page = ref(1)
 const limit = ref(6)
 const categories = ref<ICategoryItem[]>(null)
-const paginationMessage = ref('')
 const categoriesInDisplay = ref(0)
+const categoriesInit = ref(0)
 
 const totalCategories = ref(0)
 const getCategoriesData = async() => {
@@ -22,7 +20,8 @@ const getCategoriesData = async() => {
       category.modificationTime = dateFormatter(category.modificationTime)
   })
   categories.value = categoriesData
-  categoriesInDisplay.value = limit.value + (page.value - 1) * limit.value
+  categoriesInit.value = ((page.value - 1) * limit.value) + 1
+  categoriesInDisplay.value = categories.value.length + (page.value - 1) * limit.value
 }
 
 onMounted(()=>{
@@ -58,7 +57,6 @@ const previous = () => {
 
 const next = () => {
   if (totalCategories.value <= limit.value*page.value){
-    paginationMessage.value = 'You reached the limit of available Categories.'
     return
   }
   page.value++;
@@ -95,7 +93,7 @@ const setTwentyFourPerPage = () => {
               <input type="search" id="default-search" v-model="searchString" class="block p-4 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Mockups, Logos..." required>
               <button @click="searchCategory" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
           </div>
-        </div>
+      </div>
 
       <div v-if="!searching" class="bg-white p-8 mb-4 rounded-2xl">
             <h3 class="px-10 text-4xl font-medium text-gray-900">Categories</h3>
@@ -108,7 +106,8 @@ const setTwentyFourPerPage = () => {
               <button @click="setTwelvePerPage">12</button>
               <button @click="setTwentyFourPerPage">24</button>
             </div>
-            <div>Displaying {{categoriesInDisplay}} of {{totalCategories}} Categories</div>
+            <div>Displaying {{categoriesInit}} -- {{categoriesInDisplay}} </div>
+            <div>In total {{totalCategories}} Categories</div>
             <div class="px-10 py-6 grid grid-cols-3 gap-5">
                 <div v-for="category in categories" :key="category._id" class="p-6 bg-white rounded-lg border border-gray-200 shadow-md">
                     <NuxtLink :to="`/categories/${category.name}`">
