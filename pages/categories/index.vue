@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted} from 'vue'
+import Test1 from '~~/components/test.vue';
+import TestCat1 from '../../components/TestCat.vue';
 definePageMeta({
       title: "Categories"
   })
@@ -106,19 +108,10 @@ const setTwentyFourPerPage = () => {
               <button @click="setTwelvePerPage">12</button>
               <button @click="setTwentyFourPerPage">24</button>
             </div>
-            <div>Displaying {{categoriesInit}} -- {{categoriesInDisplay}} </div>
-            <div>In total {{totalCategories}} Categories</div>
+            <div>{{categoriesInit}} -{{categoriesInDisplay}} of {{totalCategories}} </div>
             <div class="px-10 py-6 grid grid-cols-3 gap-5">
-                <div v-for="category in categories" :key="category._id" class="p-6 bg-white rounded-lg border border-gray-200 shadow-md">
-                    <NuxtLink :to="`/categories/${category.name}`">
-                        <h4 class="mb-2 text-xl tracking-tight text-gray-900 font-bold hover:text-green-500">{{category.name}}</h4>
-                    </NuxtLink>
-                        <p>Description: {{category.description}}</p>
-                        <p>Filename: {{category.filename}}</p>
-                        <p>User: {{category.username}}</p>
-                        <p>Creation: {{category.creationTime}}</p>
-                        <p>Last Update: {{category.modificationTime}}</p>
-                </div>
+              
+                <CatCoso v-for="categoryItem in categories" :key="categoryItem._id" :category="categoryItem"/>
             </div>
             <button v-if="page > 1" @click="previous">Previous</button>
             <button v-if="page * limit < totalCategories" @click="next">Next</button>

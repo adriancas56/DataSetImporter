@@ -1,4 +1,4 @@
-<!-- <script lang="ts" setup>
+<script lang="ts" setup>
 
 
 const page = ref(1)
@@ -84,4 +84,4 @@ const setTwentyFourPerPage = () => {
         <button v-if="page * limit < totalCategories" @click="next">Next</button>
         <span>Page: {{page}}</span>
     </div>
-</template> -->
+</template>
