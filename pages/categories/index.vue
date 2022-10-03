@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted} from 'vue'
-import Test1 from '~~/components/test.vue';
-import TestCat1 from '../../components/TestCat.vue';
 definePageMeta({
       title: "Categories"
   })
@@ -9,8 +7,8 @@ definePageMeta({
 const page = ref(1)
 const limit = ref(6)
 const categories = ref<ICategoryItem[]>(null)
-const categoriesInDisplay = ref(0)
-const categoriesInit = ref(0)
+const categoriesDisplayedEnd = ref(0)
+const categoriesDisplayedStart = ref(0)
 
 const totalCategories = ref(0)
 const getCategoriesData = async() => {
@@ -22,8 +20,8 @@ const getCategoriesData = async() => {
       category.modificationTime = dateFormatter(category.modificationTime)
   })
   categories.value = categoriesData
-  categoriesInit.value = ((page.value - 1) * limit.value) + 1
-  categoriesInDisplay.value = categories.value.length + (page.value - 1) * limit.value
+  categoriesDisplayedStart.value = ((page.value - 1) * limit.value) + 1
+  categoriesDisplayedEnd.value = categories.value.length + (page.value - 1) * limit.value
 }
 
 onMounted(()=>{
@@ -35,11 +33,14 @@ const searchString = ref('')
 const searchTitle = ref('')
 const getSearchCategoryData = async () => {
   searchTitle.value = searchString.value
-  const { data, error } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Search/${searchString.value}`, { initialCache: false, headers: { Authorization: `Bearer ${useCookie('token').value}` } })
-  data.value.map((category: ICategoryItem) => {
+  const { data, error } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Search/${searchString.value}/${page.value}/${limit.value}`, { initialCache: false, headers: { Authorization: `Bearer ${useCookie('token').value}` } })
+  const categoriesData = data.value['categories_data']
+  totalCategories.value = data.value['categories_total']
+  categoriesData.map((category: ICategoryItem) => {
       category.creationTime = dateFormatter(category.creationTime)
       category.modificationTime = dateFormatter(category.modificationTime)
   })
+  console.log(categoriesData)
   categories.value = data.value
   searchString.value = ''
 }
@@ -58,6 +59,7 @@ const previous = () => {
 }
 
 const next = () => {
+  console.log('nani')
   if (totalCategories.value <= limit.value*page.value){
     return
   }
@@ -65,26 +67,16 @@ const next = () => {
   getCategoriesData()
 }
 
-const setSixPerPage = () => {
-  limit.value = 6
+const displayItemsPerPage = (itemsLimit: number): void => {
+  limit.value = itemsLimit
   page.value = 1
   getCategoriesData()
 }
-const setTwelvePerPage = () => {
-  limit.value = 12
-  page.value = 1
-  getCategoriesData()
-}
-const setTwentyFourPerPage = () => {
-  limit.value = 24
-  page.value = 1
-  getCategoriesData()
-}
+
 </script>
 
 <template>
     <div>
-
 
       <div>   
           <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-gray-300">Search</label>
@@ -96,44 +88,22 @@ const setTwentyFourPerPage = () => {
               <button @click="searchCategory" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
           </div>
       </div>
+      
+      <div v-if="searching">
+        <h2>Results for {{searchTitle}}</h2>
+      </div>
 
-      <div v-if="!searching" class="bg-white p-8 mb-4 rounded-2xl">
-            <h3 class="px-10 text-4xl font-medium text-gray-900">Categories</h3>
-            <hr class="mx-10 mt-3 border-gray-400">
-            <div>
-              <p>
-                Categories per page: {{limit}}
-              </p>
-              <button @click="setSixPerPage">6</button>
-              <button @click="setTwelvePerPage">12</button>
-              <button @click="setTwentyFourPerPage">24</button>
-            </div>
-            <div>{{categoriesInit}} -{{categoriesInDisplay}} of {{totalCategories}} </div>
-            <div class="px-10 py-6 grid grid-cols-3 gap-5">
-              
-                <CatCoso v-for="categoryItem in categories" :key="categoryItem._id" :category="categoryItem"/>
-            </div>
-            <button v-if="page > 1" @click="previous">Previous</button>
-            <button v-if="page * limit < totalCategories" @click="next">Next</button>
-            <span>Page: {{page}}</span>
-        </div>
-
-        <div v-else class="bg-white p-8 mb-4 rounded-2xl">
-          <div><h2>Results for {{searchTitle}}</h2></div>
-          <div class="px-10 py-6 grid grid-cols-3 gap-5">
-                <div v-for="category in categories" :key="category._id" class="p-6 bg-white rounded-lg border border-gray-200 shadow-md">
-                    <NuxtLink :to="`/categories/${category.name}`">
-                        <h4 class="mb-2 text-xl tracking-tight text-gray-900 font-bold hover:text-green-500">{{category.name}}</h4>
-                    </NuxtLink>
-                        <p>Description: {{category.description}}</p>
-                        <p>Filename: {{category.filename}}</p>
-                        <p>User: {{category.username}}</p>
-                        <p>Creation: {{category.creationTime}}</p>
-                        <p>Last Update: {{category.modificationTime}}</p>
-                </div>
-            </div>
-        </div>
-
+      <CategoryBoard v-if="categories"
+        :categories="categories"
+        :totalCategories="totalCategories"
+        :limit="limit"
+        :page="page"
+        :categoriesDisplayedStart="categoriesDisplayedStart"
+        :categoriesDisplayedEnd="categoriesDisplayedEnd"
+        @display-items-per-page="displayItemsPerPage"
+        @next-page="next"
+        @previous-page="previous"
+      ></CategoryBoard>
 
 
     </div>
