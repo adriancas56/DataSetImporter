@@ -11,5 +11,13 @@ declare global {
     modificationTime: string
   }
 
+  interface ICategoryListItem {
+    _id: string,
+    name: string,
+    username: string,
+    creationTime: string,
+    modificationTime: string
+  }
+
 }
 
