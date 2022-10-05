@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted} from 'vue'
+import { ref, onMounted, watch } from 'vue'
+
 definePageMeta({
       title: "Categories"
   })
@@ -8,7 +9,9 @@ interface ICategoryListItem {_id: string, name: string}
   
 const categories = ref<ICategoryItem[]>(null)
 const categoriesList = ref<ICategoryListItem[]>(null)
+const categoriesSelect = ref<ICategoryListItem[]>(null)
 const totalCategories = ref(0)
+
 
 const page = ref(1)
 const limit = ref(6)
@@ -18,6 +21,17 @@ const categoriesDisplayedStart = ref(0)
 const searching = ref(false)
 const searchString = ref('')
 const searchTitle = ref('')
+
+const watchSearchString = (newSearchString) => {
+  const pattern = new RegExp(newSearchString)
+  categoriesSelect.value = categoriesList.value.filter((category)=>{
+    return pattern.test(category.name)
+  })
+}
+
+watch(searchString, watchSearchString)
+
+
 
 const categoriesDateCleaner = (categories: ICategoryItem[]): void => {
   categories.map((category: ICategoryItem) => {
@@ -94,6 +108,11 @@ const getCategoriesList = async () => {
   categoriesList.value = data.value
 }
 
+const redirectCategory = (event: Event) => {
+  const categoryName = (event.target as HTMLInputElement).value
+  return navigateTo(`/categories/${categoryName}`)
+}
+
 onMounted(()=>{
   getCategoriesData()
   getCategoriesList()
@@ -113,43 +132,44 @@ onMounted(()=>{
               <button @click="searchCategory" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
           </div>
       </div> -->
-      <div>
-        {{categoriesList}}
-      </div>
+
+
       <div v-if="searching">
         <h2>Results for {{searchTitle}}</h2>
         <button @click="clearSearch">Go back to categories</button>
       </div>
 
 
-
-
-
-
       <div class="bg-white p-8 rounded-md w-full">
 
           <div class="flex items-center justify-between">
             <div class="flex bg-gray-50 items-center p-2 rounded-md">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20"
-                fill="currentColor">
-                <path fill-rule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clip-rule="evenodd" />
-              </svg>
-              <input class="bg-gray-50 outline-none ml-1 block " type="text" name="" id="" placeholder="search...">
+              <input class="bg-gray-50 outline-none ml-1 block " v-model="searchString" type="text" name="" id="" placeholder="search...">
             </div>
             <div class="lg:ml-40 ml-10 space-x-8">
-                <button class="px-4 py-2 rounded-md cursor-pointer">Search</button>
-                <button class="px-4 py-2 rounded-md font-semibold tracking-wide cursor-pointer">
-                  <svg style="width:24px;height:24px" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.8,20H14L12,16.6L10,20H8.2L11.1,15.5L8.2,11H10L12,14.4L14,11H15.8L12.9,15.5L15.8,20M13,9V3.5L18.5,9H13Z" />
+              <button class="px-4 py-2 rounded-md cursor-pointer" @click="searchCategory">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                 </svg>
-                </button>
+              </button>
+              <button class="px-4 py-2 rounded-md font-semibold tracking-wide cursor-pointer">
+                <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.8,20H14L12,16.6L10,20H8.2L11.1,15.5L8.2,11H10L12,14.4L14,11H15.8L12.9,15.5L15.8,20M13,9V3.5L18.5,9H13Z" />
+              </svg>
+              </button>
             </div>
           </div>
-
-
-        <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+          
+          <ul v-if="searchString">
+            <li v-for="categoryList in categoriesSelect" :key="categoryList._id">
+              <NuxtLink :to="`/categories/${categoryList.name}`">
+                {{categoryList.name}}
+              </NuxtLink>
+            </li>
+          </ul>
+          
+        
+          <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
           <CategoryTable v-if="categories"
             :categories="categories"
             :totalCategories="totalCategories"
@@ -178,8 +198,14 @@ onMounted(()=>{
           @next-page="next"
           @previous-page="previous"
         ></CategoryBoard> -->
+
     </div>
 
 
 </template>
 
+
+
+<style>
+
+</style>
