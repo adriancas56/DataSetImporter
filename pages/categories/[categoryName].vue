@@ -10,7 +10,6 @@
 
 <template>
     <div>
-        fasdfas
         {{response.data}}
     </div>
 </template>
