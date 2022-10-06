@@ -6,7 +6,8 @@ declare global {
     name: string,
     description: string,
     filename: string,
-    username: string,
+    userCreate: string,
+    userUpdate: string,
     creationTime: string,
     modificationTime: string
   }
@@ -14,7 +15,7 @@ declare global {
   interface ICategoryListItem {
     _id: string,
     name: string,
-    username: string,
+    userUpdate: string,
     creationTime: string,
     modificationTime: string
   }

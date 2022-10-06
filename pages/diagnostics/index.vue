@@ -33,7 +33,6 @@ function next() {
     </suspense>
 
         <div>
-        {{users}}
         <button @click="next">Next</button>
         <button @click="previous">Previous</button>
     </div>
