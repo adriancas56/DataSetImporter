@@ -12,7 +12,6 @@
     })
     
     const login = async () => {
-        console.log(userCredentials)
         const {data, error } = await useFetch('/api/v2/Login', { initialCache:false, method: 'post', body: userCredentials })
     
         if (error.value) {
