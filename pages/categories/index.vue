@@ -89,29 +89,82 @@ const getSearchCategoriesData = async () => {
   settingCategoryValues(data)
 }
 
-const deleteCategory = async (categoryId: string) => {
-  const { data } = await useFetch<ICategoryItem[]>(`/api/v2/Category/${categoryId}`, { initialCache: false, method: 'delete' })
+
+const deleteCategoryName = ref('')
+const showDeleteCategory = ref(false)
+const deleteCategoryData = ref<ICategoryItem>(null)
+const onShowDeleteCategory = (categoryId: string) => {
+  deleteCategoryData.value = categories.value.filter(category => category._id === categoryId)[0]
+  deleteCategoryName.value = `Delete ${deleteCategoryData.value.name}`
+  showDeleteCategory.value = true
+}
+const deleteCategory = async () => {
+  const { data } = await useFetch<ICategoryItem[]>(`/api/v2/Category/${deleteCategoryData.value._id}`, { initialCache: false, method: 'delete' })
   console.log(data)
+  closeModal('delete-category')
   getDataExecution()
 }
 
-
+interface ICategoryUpload {
+  message: string
+  statusCode: number
+  warnings: string[]
+  error?: string
+  id?: string
+}
 const showCategoryUpload = ref(false)
 const categoryName = ref('')
 const categoryDesc = ref('')
-const file = ref(null)
-const uploadCategory = async (event: Event) => {
-  const file2 = ((event.target as HTMLFormElement).elements.namedItem('categoryFile') as HTMLInputElement)
-
+const categoryFile = ref(null)
+const categoryWarnings = ref<string[]>(null)
+const categoryError = ref(null)
+const showCategoryWarnings = ref(false)
+const showCategoryErrors = ref(false)
+const uploadCategory = async () => {
   const formCategory = new FormData()
   formCategory.append('name', categoryName.value)
   formCategory.append('description', categoryDesc.value)
-  formCategory.append('spreadsheet', file2.files[0])
+  formCategory.append('spreadsheet', categoryFile.value.files[0])
 
-  const { data, error } = await useFetch(`/api/v2/Category`, { initialCache: false, method: 'post', body: formCategory})
+  const response = await $fetch<ICategoryUpload>(`/api/v2/Category`, { method: 'post', body: formCategory}).catch((error) => error.data)
+  
+  if (response.statusCode >= 400){
+    categoryError.value = response.message
+    showCategoryErrors.value = true
+  }
+  if (response.warnings) {
+    categoryWarnings.value = response.warnings
+    showCategoryWarnings.value= true
+  }
+  closeModal('upload')
+  getDataExecution()
+}
 
-  console.log(error)
-  console.log(data)
+const closeModal = (modal: string) => {
+
+  switch (modal) {
+    case 'error':
+      showCategoryErrors.value = false
+      break
+    
+    case 'warning':
+      showCategoryWarnings.value = false 
+      break
+  
+    case 'upload':
+      showCategoryUpload.value = false
+      break
+
+    case 'delete-category':
+      deleteCategoryName.value = ''
+      deleteCategoryData.value = null
+      showDeleteCategory.value = false
+      break
+
+    default:
+      break
+  }
+
 }
 
 onMounted(()=>{
@@ -156,34 +209,53 @@ onMounted(()=>{
         @display-items-per-page="displayItemsPerPage"
         @next-page="next"
         @previous-page="previous"
-        @delete-category="deleteCategory"
+        @delete-category="onShowDeleteCategory"
       ></CategoryTable>
 
 
-
-      <div class="fixed z-50 inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full px-4 modal" :class="{'hidden': !showCategoryUpload}" @keydown.esc="showCategoryUpload = false">
-        <div class="relative top-40 mx-auto shadow-xl rounded-lg bg-white max-w-md">
-
-          <div class="flex justify-between items-center bg-green-500 text-white text-xl rounded-t-lg px-4 py-2">
-              <h3>Upload Category</h3>
-          </div>
-
-          <div class="px-4 pt-4">
-            <form @submit.prevent="uploadCategory">
-              <BaseInput v-model="categoryName" label="Category Name" type="text" name="categoryName" id="categoryName"/>
-              <BaseInput v-model="categoryDesc" label="Category Desc" type="text" name="categoryDesc" id="categoryDesc"/>
-              <BaseInput v-model="file" label="Spreadsheet" type="file" name="categoryFile" id="categoryFile"/>
-              <!-- <input ref="file" type="file" name="spreadsheet"> -->
-              <div class="py-4 flex justify-between items-center">
-                <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" type="button" @click="showCategoryUpload = false">Close</button>
-                <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" type="submit">Upload</button>
-              </div>
-            </form>
-          </div>
-
+      <Modal :title="deleteCategoryName" :onShow="showDeleteCategory" @close-on-show="closeModal('delete-category')">
+        <p class="text-lg pb-4">
+          Are you sure you want to delete this category?
+        </p>
+        <div class="flex justify-between">
+          <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="closeModal('delete-category')">Cancel</button>
+          <button class="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="deleteCategory">Delete</button>
         </div>
-      </div>
+      </Modal>
 
+      <Modal :title="'Error'" :onShow="showCategoryErrors" @close-on-show="closeModal('error')">
+        <p>
+          {{categoryError}}
+        </p>
+        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" type="button" @click="closeModal('error')">Understood</button>
+      </Modal>
+
+      
+      <Modal :title="'Warnings'" :onShow="showCategoryWarnings" @close-on-show="closeModal('warning')">
+        <ul>
+          <li v-for="warning in categoryWarnings">
+            {{warning}}
+          </li>
+        </ul>
+        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" type="button" @click="closeModal('warning')">Understood</button>
+      </Modal>
+      
+
+      <Modal :title="'Upload Category'" :onShow="showCategoryUpload" @close-on-show="closeModal('upload')">
+        <form @submit.prevent="uploadCategory">
+          <fieldset>
+            <legend>Category Information</legend>
+            <BaseInput v-model="categoryName" label="Category Name" type="text" name="categoryName" id="categoryName" required/>
+            <BaseInput v-model="categoryDesc" label="Category Desc" type="text" name="categoryDesc" id="categoryDesc"/>
+            <label for="categoryFile">Category File</label>
+            <input ref="categoryFile" type="file" name="categoryFile" id="categoryFile" required>
+            <div class="flex justify-between items-center pt-4">
+              <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="closeModal('upload')">Close</button>
+              <button class="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="submit">Upload</button>
+            </div>
+        </fieldset>
+      </form>
+      </Modal>
 
       
   </div>
