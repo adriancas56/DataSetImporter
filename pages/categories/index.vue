@@ -120,24 +120,32 @@ const categoryWarnings = ref<string[]>(null)
 const categoryError = ref(null)
 const showCategoryWarnings = ref(false)
 const showCategoryErrors = ref(false)
+const isLoadingCategoryUpload = ref(false)
 const uploadCategory = async () => {
   const formCategory = new FormData()
   formCategory.append('name', categoryName.value)
   formCategory.append('description', categoryDesc.value)
   formCategory.append('spreadsheet', categoryFile.value.files[0])
 
-  const response = await $fetch<ICategoryUpload>(`/api/v2/Category`, { method: 'post', body: formCategory}).catch((error) => error.data)
+  // const response = await $fetch<ICategoryUpload>(`/api/v2/Category`, { method: 'post', body: formCategory}).catch((error) => error.data)
+  isLoadingCategoryUpload.value = true
+  console.log(isLoadingCategoryUpload.value)
+  const { data, pending, error, refresh } = await useAsyncData( () => $fetch<ICategoryUpload>(`/api/v2/Category`, { method: 'post', body: formCategory}).catch((error) => error.data), {initialCache: false})
   
-  if (response.statusCode >= 400){
-    categoryError.value = response.message
-    showCategoryErrors.value = true
-  }
-  if (response.warnings) {
-    categoryWarnings.value = response.warnings
-    showCategoryWarnings.value= true
-  }
-  closeModal('upload')
-  getDataExecution()
+  isLoadingCategoryUpload.value = pending.value
+  console.log(data)
+  
+  
+  // if (response.statusCode >= 400){
+  //   categoryError.value = response.message
+  //   showCategoryErrors.value = true
+  // }
+  // if (response.warnings) {
+  //   categoryWarnings.value = response.warnings
+  //   showCategoryWarnings.value= true
+  // }
+  // closeModal('upload')
+  // getDataExecution()
 }
 
 const closeModal = (modal: string) => {
@@ -152,6 +160,10 @@ const closeModal = (modal: string) => {
       break
   
     case 'upload':
+      categoryName.value = ''
+      categoryDesc.value = ''
+      categoryFile.value = null
+      // document.getElementById("categoryUploadForm").reset()
       showCategoryUpload.value = false
       break
 
@@ -224,37 +236,83 @@ onMounted(()=>{
       </Modal>
 
       <Modal :title="'Error'" :onShow="showCategoryErrors" @close-on-show="closeModal('error')">
-        <p>
+        <p class="pb-2">
           {{categoryError}}
         </p>
-        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" type="button" @click="closeModal('error')">Understood</button>
+        <button class="float-right bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" type="button" @click="closeModal('error')">Understood</button>
       </Modal>
 
       
       <Modal :title="'Warnings'" :onShow="showCategoryWarnings" @close-on-show="closeModal('warning')">
-        <ul>
-          <li v-for="warning in categoryWarnings">
-            {{warning}}
-          </li>
-        </ul>
-        <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" type="button" @click="closeModal('warning')">Understood</button>
+          <ul class="px-2 list-disc pb-2 space-y-1.5">
+            <li v-for="warning in categoryWarnings">
+              {{warning}}
+            </li>
+          </ul>
+          <button class="float-right bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="closeModal('warning')">Understood</button>
+        
       </Modal>
       
 
       <Modal :title="'Upload Category'" :onShow="showCategoryUpload" @close-on-show="closeModal('upload')">
-        <form @submit.prevent="uploadCategory">
-          <fieldset>
-            <legend>Category Information</legend>
-            <BaseInput v-model="categoryName" label="Category Name" type="text" name="categoryName" id="categoryName" required/>
-            <BaseInput v-model="categoryDesc" label="Category Desc" type="text" name="categoryDesc" id="categoryDesc"/>
-            <label for="categoryFile">Category File</label>
-            <input ref="categoryFile" type="file" name="categoryFile" id="categoryFile" required>
-            <div class="flex justify-between items-center pt-4">
-              <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="closeModal('upload')">Close</button>
-              <button class="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="submit">Upload</button>
+
+        <form @submit.prevent="uploadCategory" class="w-full max-w-sm" id="categoryUploadForm">
+          <div class="flex items-center mb-6">
+            <div class="w-1/3">
+              <label class="block text-gray-500 font-bold text-right mb-1 mb-0 pr-2">
+                Name
+              </label>
             </div>
-        </fieldset>
-      </form>
+            <div class="w-2/3">
+              <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-gray-900" 
+              v-model="categoryName" label="Category Name" type="text" name="categoryName" id="categoryName" required>
+            </div>
+          </div>
+
+          <div class="flex items-center mb-6">
+            <div class="w-1/3">
+              <label class="block text-gray-500 font-bold text-right mb-1 mb-0 pr-2">
+                Description
+              </label>
+            </div>
+            <div class="w-2/3">
+              <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-gray-900" 
+              v-model="categoryDesc" label="Category Description" type="text" name="categoryDesc" id="categoryDesc">
+            </div>
+          </div>
+
+          <div class="flex items-center mb-6">
+            <div class="w-1/3">
+              <label class="block text-gray-500 font-bold text-right mb-1 mb-0 pr-2">
+                File
+              </label>
+            </div>
+            <div class="w-2/3">
+              <input class="file:py-2 file:bg-gray-900 file:text-white file:rounded-md file:hover:bg-gray-500 text-gray-700 bg-gray-200 rounded-md w-full text-gray-700 leading-tight" 
+              ref="categoryFile" type="file" name="categoryFile" id="categoryFile" required>
+            </div>
+          </div>
+
+          <div class="flex mitems-center">
+            <div class="w-1/3"></div>
+            <div class="w-2/3 flex justify-between">
+              <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="reset" @click="closeModal('upload')">Cancel</button>
+              <button class="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="submit">
+                <span v-if="!isLoadingCategoryUpload">
+                  Upload
+                </span>
+                
+                <svg v-else class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                
+
+              </button>
+            </div>
+          </div>
+        </form>
+
       </Modal>
 
       
