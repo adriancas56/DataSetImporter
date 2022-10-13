@@ -20,5 +20,13 @@ declare global {
     modificationTime: string
   }
 
+  interface ICategoryResponse {
+    message: string
+    statusCode: number
+    warnings?: string[]
+    error?: string
+    id?: string
+  }
+
 }
 

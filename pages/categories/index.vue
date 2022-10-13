@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { debounce } from 'lodash'
 import { ref, reactive, onMounted, watch, InputHTMLAttributes } from 'vue'
 
 definePageMeta({
@@ -12,10 +13,14 @@ const page = ref(1)
 const limit = ref(12)
 const categoriesDisplayedEnd = ref(0)
 const categoriesDisplayedStart = ref(0)
+const isLoadingCategoryData = ref(false)
+const errorLoadingCategoriesData = ref(false)
+
+const categoryError = ref('')
+const showCategoryErrors = ref(false)
 
 const searching = ref(false)
 const searchString = ref('')
-
 
 const watchSearchString = (newSearchString) => {
   if(!newSearchString){
@@ -39,7 +44,8 @@ const categoriesDateCleaner = (categories: ICategoryItem[]): void => {
 const searchCategory = () => {
   searching.value = true
   page.value = 1
-  getSearchCategoriesData()
+  const debounceSearchCategory = debounce(getSearchCategoriesData, 1500)
+  debounceSearchCategory()
 }
 
 
@@ -78,14 +84,32 @@ const settingCategoryValues = (data): void => {
   categoriesDisplayedEnd.value = categories.value.length + (page.value - 1) * limit.value
 }
 
-const getCategoriesData = async() => {
-  const { data } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Page/${page.value}/${limit.value}`, { initialCache: false})
+const getCategoriesData = async () => {
+  isLoadingCategoryData.value = true
+  const { data, pending, error } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Page/${page.value}/${limit.value}`, { initialCache: false})
+  isLoadingCategoryData.value = pending.value
+
+  if (error.value) {
+    errorLoadingCategoriesData.value = true
+    return
+  }
+
+  errorLoadingCategoriesData.value = false
   settingCategoryValues(data)
 }
 
 const getSearchCategoriesData = async () => {
   const searchQuery = searchString.value
-  const { data } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Search/${searchQuery}/${page.value}/${limit.value}`, { initialCache: false })
+  isLoadingCategoryData.value = true
+  const { data, pending, error } = await useFetch<ICategoryItem[]>(`/api/v2/Category/Search/${searchQuery}/${page.value}/${limit.value}`, { initialCache: false })
+  isLoadingCategoryData.value = pending.value
+  
+  if (error.value) {
+    errorLoadingCategoriesData.value = true
+    return
+  }
+
+  errorLoadingCategoriesData.value = false
   settingCategoryValues(data)
 }
 
@@ -93,33 +117,31 @@ const getSearchCategoriesData = async () => {
 const deleteCategoryName = ref('')
 const showDeleteCategory = ref(false)
 const deleteCategoryData = ref<ICategoryItem>(null)
+const isLoadingCategoryDelete = ref(false)
 const onShowDeleteCategory = (categoryId: string) => {
   deleteCategoryData.value = categories.value.filter(category => category._id === categoryId)[0]
   deleteCategoryName.value = `Delete ${deleteCategoryData.value.name}`
   showDeleteCategory.value = true
 }
 const deleteCategory = async () => {
-  const { data } = await useFetch<ICategoryItem[]>(`/api/v2/Category/${deleteCategoryData.value._id}`, { initialCache: false, method: 'delete' })
-  console.log(data)
+  isLoadingCategoryDelete.value = true
+  const { pending, error } = await useFetch<ICategoryResponse>(`/api/v2/Category/${deleteCategoryData.value._id}`, { initialCache: false, method: 'delete' })
+  isLoadingCategoryDelete.value = pending.value
   closeModal('delete-category')
+  if (error.value) {
+    categoryError.value = 'Something went wrong, please try again.'
+    showCategoryErrors.value = true
+  }
   getDataExecution()
 }
 
-interface ICategoryUpload {
-  message: string
-  statusCode: number
-  warnings: string[]
-  error?: string
-  id?: string
-}
 const showCategoryUpload = ref(false)
 const categoryName = ref('')
 const categoryDesc = ref('')
 const categoryFile = ref(null)
 const categoryWarnings = ref<string[]>(null)
-const categoryError = ref(null)
+
 const showCategoryWarnings = ref(false)
-const showCategoryErrors = ref(false)
 const isLoadingCategoryUpload = ref(false)
 const uploadCategory = async () => {
   const formCategory = new FormData()
@@ -127,25 +149,21 @@ const uploadCategory = async () => {
   formCategory.append('description', categoryDesc.value)
   formCategory.append('spreadsheet', categoryFile.value.files[0])
 
-  // const response = await $fetch<ICategoryUpload>(`/api/v2/Category`, { method: 'post', body: formCategory}).catch((error) => error.data)
   isLoadingCategoryUpload.value = true
-  console.log(isLoadingCategoryUpload.value)
-  const { data, pending, error, refresh } = await useAsyncData( () => $fetch<ICategoryUpload>(`/api/v2/Category`, { method: 'post', body: formCategory}).catch((error) => error.data), {initialCache: false})
+  const { data: response, pending} = await useAsyncData( () => $fetch<ICategoryResponse>(`/api/v2/Category`, { method: 'post', body: formCategory}).catch((error) => error.data), {initialCache: false})
   
   isLoadingCategoryUpload.value = pending.value
-  console.log(data)
   
-  
-  // if (response.statusCode >= 400){
-  //   categoryError.value = response.message
-  //   showCategoryErrors.value = true
-  // }
-  // if (response.warnings) {
-  //   categoryWarnings.value = response.warnings
-  //   showCategoryWarnings.value= true
-  // }
-  // closeModal('upload')
-  // getDataExecution()
+  if (response.value.statusCode >= 400){
+    categoryError.value = response.value.message
+    showCategoryErrors.value = true
+  }
+  if (response.value.warnings) {
+    categoryWarnings.value = response.value.warnings
+    showCategoryWarnings.value= true
+  }
+  closeModal('upload')
+  getDataExecution()
 }
 
 const closeModal = (modal: string) => {
@@ -188,7 +206,7 @@ onMounted(()=>{
 
 <template>
   <div class="bg-white p-8 rounded-md w-full">
-
+    
 
       <div class="flex items-center pb-4 justify-between">
 
@@ -209,9 +227,8 @@ onMounted(()=>{
         </div>
 
       </div>
-
       
-      <CategoryTable v-if="categories"
+      <CategoryTable v-if="categories && !isLoadingCategoryData"
         :categories="categories"
         :totalCategories="totalCategories"
         :limit="limit"
@@ -223,6 +240,25 @@ onMounted(()=>{
         @previous-page="previous"
         @delete-category="onShowDeleteCategory"
       ></CategoryTable>
+      <div v-else-if="errorLoadingCategoriesData" class="bg-red-500 text-white rounded-md py-5 text-center">
+        <p class="font-semibold text-lg pb-1">There was an error, please try again.</p>
+        <button @click="getDataExecution" class="rounded-md p-1 hover:bg-red-400">
+          <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+            <path fill="currentColor"
+              d="M2 12C2 16.97 6.03 21 11 21C13.39 21 15.68 20.06 17.4 18.4L15.9 16.9C14.63 18.25 12.86 19 11 19C4.76 19 1.64 11.46 6.05 7.05C10.46 2.64 18 5.77 18 12H15L19 16H19.1L23 12H20C20 7.03 15.97 3 11 3C6.03 3 2 7.03 2 12Z" />
+          </svg>
+        </button>
+      </div>
+      <div v-else class="shadow rounded-md p-4  w-full mx-auto">
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 mt-3 mb-6 rounded"></div>
+          <div class="h-4 bg-gray-300 mb-6 rounded"></div>
+          <div class="h-4 bg-gray-200 mb-6 rounded"></div>
+          <div class="h-4 bg-gray-300 mb-6 rounded"></div>
+          <div class="h-4 bg-gray-200 mb-6 rounded"></div>
+        </div>
+      </div>
+      <!-- <SpinningWheel v-else></SpinningWheel> -->
 
 
       <Modal :title="deleteCategoryName" :onShow="showDeleteCategory" @close-on-show="closeModal('delete-category')">
@@ -231,7 +267,12 @@ onMounted(()=>{
         </p>
         <div class="flex justify-between">
           <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="closeModal('delete-category')">Cancel</button>
-          <button class="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="deleteCategory">Delete</button>
+          <button class="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition" type="button" @click="deleteCategory">
+            <span v-if="!isLoadingCategoryDelete">
+              Delete
+            </span>
+            <SpinningWheel v-else></SpinningWheel>
+          </button>
         </div>
       </Modal>
 
@@ -259,7 +300,7 @@ onMounted(()=>{
         <form @submit.prevent="uploadCategory" class="w-full max-w-sm" id="categoryUploadForm">
           <div class="flex items-center mb-6">
             <div class="w-1/3">
-              <label class="block text-gray-500 font-bold text-right mb-1 mb-0 pr-2">
+              <label class="block text-gray-500 font-bold text-right mb-0 pr-2">
                 Name
               </label>
             </div>
@@ -271,7 +312,7 @@ onMounted(()=>{
 
           <div class="flex items-center mb-6">
             <div class="w-1/3">
-              <label class="block text-gray-500 font-bold text-right mb-1 mb-0 pr-2">
+              <label class="block text-gray-500 font-bold text-right mb-0 pr-2">
                 Description
               </label>
             </div>
@@ -283,12 +324,12 @@ onMounted(()=>{
 
           <div class="flex items-center mb-6">
             <div class="w-1/3">
-              <label class="block text-gray-500 font-bold text-right mb-1 mb-0 pr-2">
+              <label class="block text-gray-500 font-bold text-right mb-0 pr-2">
                 File
               </label>
             </div>
             <div class="w-2/3">
-              <input class="file:py-2 file:bg-gray-900 file:text-white file:rounded-md file:hover:bg-gray-500 text-gray-700 bg-gray-200 rounded-md w-full text-gray-700 leading-tight" 
+              <input class="file:py-2 file:bg-gray-900 file:text-white file:rounded-md file:hover:bg-gray-500 text-gray-700 bg-gray-200 rounded-md w-full leading-tight" 
               ref="categoryFile" type="file" name="categoryFile" id="categoryFile" required>
             </div>
           </div>
@@ -301,12 +342,7 @@ onMounted(()=>{
                 <span v-if="!isLoadingCategoryUpload">
                   Upload
                 </span>
-                
-                <svg v-else class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                
+                <SpinningWheel v-else></SpinningWheel>
 
               </button>
             </div>
