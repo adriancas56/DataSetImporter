@@ -5,7 +5,7 @@ definePageMeta({
     title: "Diagnostics"
 })
 
-
+const onShow = ref(false)
 const page = ref(1)
 const limit = ref(12)
 const events = ref(null)
@@ -42,22 +42,44 @@ getEventsData()
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="event in events" :key="event._id" class="bg-white text-sm border-b border-gray-200 text-gray-900 whitespace-no-wrap">
-                                    
-                            <td class="pl-5 py-5">
-                                <p>{{event.categoryName}}</p>
-                            </td>
-                            <td class="px-5 py-5">
-                                <p>{{event.creationTime}}</p>
-                            </td>
-                            <td class="px-5 py-5">
+                        <template v-for="event in events" :key="event._id">
+                            <tr class="bg-white text-sm border-b border-gray-200 text-gray-900 whitespace-no-wrap">
+                                <td class="pl-5 py-5">
+                                    <p>{{event.categoryName}}</p>
+                                </td>
+                                <td class="px-5 py-5">
+                                    <p>{{event.creationTime}}</p>
+                                </td>
+                                <td class="px-5 py-5">
                                 <p>{{event.filename}}</p>
-                            </td>
-                            <td class="px-5 py-5">
-                                <p>{{event.executionType}}</p>
-                            </td>
-                            <td class="px-5 py-5 w-[32rem]">
-                                <div  v-if="event.executionType == 'creation'">
+                                </td>
+                                <td class="px-5 py-5">
+                                    <p>{{event.executionType}}</p>
+                                </td>
+                                <td class="px-5 py-5">
+                                    <button>
+                                        Click Me
+                                    </button>
+                                    <!-- <div  v-if="event.executionType == 'creation'">
+                                        <details class="bg-gray-300 duration-300 rounded-md">
+                                            <summary class="bg-inherit px-3 py-2 text-base cursor-pointer">Warnings</summary>
+                                            <div class="bg-white px-5 py-3 border border-gray-300 text-sm font-light">
+                                                <ul class="pl-2 list-disc">
+                                                    <li v-for="warning in event.warnings">{{warning}}</li>
+                                                </ul>
+                                            </div>
+                                        </details>
+                                    </div>
+                                    <div v-else-if="event.executionType == 'Failed'">
+                                        <p>Error</p>
+                                    </div> -->
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="overflow">
+
+                                <div class="w-full">
                                     <details class="bg-gray-300 duration-300 rounded-md">
                                         <summary class="bg-inherit px-3 py-2 text-base cursor-pointer">Warnings</summary>
                                         <div class="bg-white px-5 py-3 border border-gray-300 text-sm font-light">
@@ -67,19 +89,13 @@ getEventsData()
                                         </div>
                                     </details>
                                 </div>
-                                <div v-else-if="event.executionType == 'Failed'">
-                                    <p>Error</p>
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+
+                            </tr>
+
+                        </template>
                     </tbody>
                 </table>
-                            <!-- category name, execution type, date
-                            if they click on category name redirect to the stuff -->
-
-
-
-
     </div>
 </template>
 
