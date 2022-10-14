@@ -29,6 +29,8 @@ const watchSearchString = (newSearchString) => {
     return
   }
   searchCategory()
+  // const debounceSearchCategory = debounce(searchCategory, 1500)
+  // debounceSearchCategory()
 }
 
 watch(searchString, watchSearchString)
@@ -44,8 +46,7 @@ const categoriesDateCleaner = (categories: ICategoryItem[]): void => {
 const searchCategory = () => {
   searching.value = true
   page.value = 1
-  const debounceSearchCategory = debounce(getSearchCategoriesData, 1500)
-  debounceSearchCategory()
+  getSearchCategoriesData()
 }
 
 
