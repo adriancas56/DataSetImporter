@@ -2,100 +2,125 @@
 import { useDiagnosticsStore } from '@/stores/diagnosticsStore'
 import { ref, onMounted, onBeforeMount } from 'vue'
 definePageMeta({
-    title: "Diagnostics"
+    title: "Events History"
 })
 
-const onShow = ref(false)
+
+const dateCleaner = (array): void => {
+    array.map((elem) => {
+        elem.creationDate = new Date(elem.creationTime).toDateString()
+        elem.creationTime = dateFormatter(elem.creationTime)
+  }) 
+}
+
+
 const page = ref(1)
 const limit = ref(12)
 const events = ref(null)
+const expand = ref({})
+
 const getEventsData = async () => {
-    const { data, pending, error } = await useFetch(`/api/v2/Diagnostics/${page.value}/${limit.value}`, { initialCache: false })
+    const { data, pending, error } = await useFetch<IDiagnosticsItem[]>(`/api/v2/Diagnostics/${page.value}/${limit.value}`, { initialCache: false })
+    data.value.forEach((x) => expand.value[x._id] = false)
     events.value = data.value
+    dateCleaner(events.value)
+}
+
+const expandItem = (id: string) => {
+    expand.value[id] = !expand.value[id]
+}
+
+
+const onExpandItems = (isExpansion: boolean) => {
+    if (isExpansion) {
+        for (const key in expand.value) { expand.value[key] = true }
+    } else {
+        for (const key in expand.value) { expand.value[key] = false }
+    }
+}
+
+const onDownloadFile = (eventId: string) => {
+    console.log(eventId)
 }
 
 getEventsData()
 
-
 </script>
+
 
 <template>
     <div class="bg-white p-8 rounded-md w-full">
-                <table class="w-full tableClass">
-                    <thead>
-                        <tr class="border-b-2 border-gray-200 text-left text-xs font-bold text-gray-700 uppercase">
-                            <th class="px-5 py-3">
-                                Name
-                            </th>
-                            <th class="px-5 py-3">
-                                Date
-                            </th>
-                            <th class="px-5 py-3">
-                                File
-                            </th>
-                            <th class="px-5 py-3">
-                                Execution Type
-                            </th>
-                            <th class="px-3 py-3 min-w-[24rem]">
-                                Execution Details
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template v-for="event in events" :key="event._id">
-                            <tr class="bg-white text-sm border-b border-gray-200 text-gray-900 whitespace-no-wrap">
-                                <td class="pl-5 py-5">
-                                    <p>{{event.categoryName}}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <p>{{event.creationTime}}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                <p>{{event.filename}}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <p>{{event.executionType}}</p>
-                                </td>
-                                <td class="px-5 py-5">
-                                    <button>
-                                        Click Me
-                                    </button>
-                                    <!-- <div  v-if="event.executionType == 'creation'">
-                                        <details class="bg-gray-300 duration-300 rounded-md">
-                                            <summary class="bg-inherit px-3 py-2 text-base cursor-pointer">Warnings</summary>
-                                            <div class="bg-white px-5 py-3 border border-gray-300 text-sm font-light">
-                                                <ul class="pl-2 list-disc">
-                                                    <li v-for="warning in event.warnings">{{warning}}</li>
-                                                </ul>
-                                            </div>
-                                        </details>
-                                    </div>
-                                    <div v-else-if="event.executionType == 'Failed'">
-                                        <p>Error</p>
-                                    </div> -->
-                                </td>
-                            </tr>
+        <div class="flex justify-end gap-x-4 pb-3">
+            <button @click="onExpandItems(true)" class="bg-gray-900 text-white text-sm rounded py-1 px-2 hover:bg-gray-500" >Expand All</button>
+            <button @click="onExpandItems(false)" class="bg-gray-900 text-white text-sm rounded py-1 px-2 hover:bg-gray-500">Close All</button>
+        </div>
 
-                            <tr>
-                                <td class="overflow">
+        <div class="grid grid-cols-12 gap-x-2 gap-y-0 border-b-2 border-gray-200 text-left text-xs font-bold text-gray-700 uppercase">
+            <div class="px-2 py-3 col-span-5">Spreadsheet</div>
+            <div class="py-3 col-span-2">Execution Date</div>
+            <div class="py-3 col-span-1">Result</div>
+            <div class="py-3 col-span-3">Category Name</div>
+            <div class="text-center py-3 col-span-1">Details</div>
+        </div>
 
-                                <div class="w-full">
-                                    <details class="bg-gray-300 duration-300 rounded-md">
-                                        <summary class="bg-inherit px-3 py-2 text-base cursor-pointer">Warnings</summary>
-                                        <div class="bg-white px-5 py-3 border border-gray-300 text-sm font-light">
-                                            <ul class="pl-2 list-disc">
-                                                <li v-for="warning in event.warnings">{{warning}}</li>
-                                            </ul>
-                                        </div>
-                                    </details>
+        <template v-for="event in events" :key="event._id">
+            <div class="grid grid-cols-12 gap-x-2 gap-y-0 bg-white border-b border-gray-200 text-sm text-gray-900 whitespace-no-wrap hover:bg-gray-100">
+                <div class="px-2 py-3 col-span-5 cursor-pointer" @click="expandItem(event._id)">
+                    <p>{{event.filename}}</p>
+                </div>
+                <div class="py-3 col-span-2">
+                    <p>{{event.creationDate}}</p>
+                </div>
+                <div class="py-3 col-span-1">
+                    <p>{{event.executionType}}</p>
+                </div>
+                <div class="pt-3 col-span-3">
+                    <p>{{event.categoryName}}</p>
+                </div>
+                <div class="text-center py-1 col-span-1">
+                    <button @click="expandItem(event._id)" class="hover:bg-white p-1 rounded-full" :class="{'rotate-180': expand[event._id]}">
+                        <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div v-if="expand[event._id]" class="col-span-full px-6 pb-2 ">
+                    <div class="flex justify-between">
+                        <div>
+                            <p>
+                                <span class="text-xs font-bold text-gray-700 uppercase">User: </span>
+                                <span>{{event.username}}</span>
+                            </p>
+                            <p>
+                                <span class="text-xs font-bold text-gray-700 uppercase">Time: </span>
+                                <span>{{event.creationTime}}</span>
+                            </p>
+                        </div>
+                        <div class="flex items-center">
+                            <button @click="onDownloadFile(event._id)" class="bg-green-500 text-white rounded py-1 px-2 hover:bg-gray-500">
+                                Download Spreadsheet
+                            </button>
+                        </div>
+                    </div>
+                    <div v-if="event.executionType != 'error'" >
+                            <div v-if="event.warnings.length > 0" >
+                                <span class="text-xs font-bold text-gray-700 uppercase">Warnings:</span>
+                                <div >
+                                    <ul class="px-5 list-disc">
+                                        <li v-for="warning in event.warnings">{{warning}}</li>
+                                    </ul>
                                 </div>
-                                </td>
+                            </div>
+                        </div>
+                        <div v-else >
+                            <span class="text-xs font-bold text-gray-700 uppercase">Error: </span>
+                            <span>{{event.error}}</span>
+                        </div>
+                </div>
 
-                            </tr>
-
-                        </template>
-                    </tbody>
-                </table>
+            </div>
+        </template>
     </div>
 </template>
 

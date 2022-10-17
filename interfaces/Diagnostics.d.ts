@@ -9,7 +9,7 @@ declare global {
         categoryName: string,
         executionType: string, 
         warnings: string[],
-        errors : string, 
+        error : string, 
         creationTime : string
     }
 }
