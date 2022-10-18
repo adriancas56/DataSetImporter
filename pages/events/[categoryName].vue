@@ -2,7 +2,7 @@
     import { ref, onMounted, onBeforeMount } from 'vue'
 const route = useRoute()
     console.log(route.params.categoryName)
-    const {data} = await useFetch(`/api/DiagnosticsCategory?categoryName=${route.params.categoryName}`, { initialCache: false })
+    const {data} = await useFetch(`/api/EventsCategory?categoryName=${route.params.categoryName}`, { initialCache: false })
 
 </script>
 

@@ -5,7 +5,7 @@
     })
 
     const categories = ref<ICategoryItem[]>(null)
-    const diagnostics = ref<IDiagnosticsItem[]>(null)
+    const events = ref<IEventsItem[]>(null)
     
     const getCategoriesData = async() => {
         const { data } = await useFetch<ICategoryItem[]>('/api/v2/Categories/latest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
@@ -17,22 +17,22 @@
         categories.value = data.value
     }
 
-    const getDiagnosticsData = async () => {
-        const {data} = await useFetch<IDiagnosticsItem[]>('/api/v2/Diagnostics/latest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
-        data.value.map((category: IDiagnosticsItem) => {
+    const getEventsData = async () => {
+        const {data} = await useFetch<IEventsItem[]>('/api/v2/Events/latest', { initialCache: false, headers: { Authorization: `Bearer ${useCookie('access_token').value}` } })
+        data.value.map((category: IEventsItem) => {
             category.creationTime = dateFormatter(category.creationTime)
         })
-        diagnostics.value = data.value
+        events.value = data.value
     }
 
      getCategoriesData()
-     getDiagnosticsData()
+     getEventsData()
 </script>
     
 <template>
     <div>
         <div>
-            {{diagnostics}}
+            {{events}}
         </div>
         <div class="bg-white p-8 mb-4 rounded-2xl">
             <h3 class="px-10 text-4xl font-medium text-gray-900">Categories</h3>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useDiagnosticsStore } from '@/stores/diagnosticsStore'
 import { ref, onMounted, onBeforeMount } from 'vue'
 definePageMeta({
     title: "Events History"
@@ -20,7 +19,7 @@ const events = ref(null)
 const expand = ref({})
 
 const getEventsData = async () => {
-    const { data, pending, error } = await useFetch<IDiagnosticsItem[]>(`/api/v2/Diagnostics/${page.value}/${limit.value}`, { initialCache: false })
+    const { data, pending, error } = await useFetch<IEventsItem[]>(`/api/v2/Events/${page.value}/${limit.value}`, { initialCache: false })
     data.value.forEach((x) => expand.value[x._id] = false)
     events.value = data.value
     dateCleaner(events.value)
@@ -39,8 +38,8 @@ const onExpandItems = (isExpansion: boolean) => {
     }
 }
 
-const onDownloadFile = (eventId: string) => {
-    console.log(eventId)
+const onDownloadFile = async (eventId: string) => {
+    return await $fetch(`/api/v2/Category/File/${eventId}`)
 }
 
 getEventsData()
@@ -98,9 +97,9 @@ getEventsData()
                             </p>
                         </div>
                         <div class="flex items-center">
-                            <button @click="onDownloadFile(event._id)" class="bg-green-500 text-white rounded py-1 px-2 hover:bg-gray-500">
+                            <a :href="`http://localhost:5000/Category/File/${event._id}`" download class="bg-green-500 text-white rounded py-1 px-2 hover:bg-gray-500">
                                 Download Spreadsheet
-                            </button>
+                            </a>
                         </div>
                     </div>
                     <div v-if="event.executionType != 'error'" >

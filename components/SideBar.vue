@@ -22,11 +22,11 @@ const logout = () => {
                 </svg>
                 <span class="tooltiptext">Categories</span>
             </NuxtLink>
-            <NuxtLink to="/diagnostics" class="block py-3 px-4 hover:bg-gray-700 hover:text-white tooltip" activeClass="bg-green-500">
+            <NuxtLink to="/events" class="block py-3 px-4 hover:bg-gray-700 hover:text-white tooltip" activeClass="bg-green-500">
                 <svg style="width:22px;height:22px" viewBox="0 0 22 22">
                     <path fill="currentColor" d="M3,3H21V7H3V3M4,8H20V21H4V8M9.5,11A0.5,0.5 0 0,0 9,11.5V13H15V11.5A0.5,0.5 0 0,0 14.5,11H9.5Z" />
                 </svg>
-                <span class="tooltiptext">Diagnostics</span>
+                <span class="tooltiptext">Events</span>
             </NuxtLink>
         </nav>
         <div class="">

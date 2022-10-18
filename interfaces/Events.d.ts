@@ -1,7 +1,7 @@
 export {}
 
 declare global {
-    interface IDiagnosticsItem {
+    interface IEventsItem {
         _id: string,
         filename: string,
         username: string, 
