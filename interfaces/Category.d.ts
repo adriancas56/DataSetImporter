@@ -6,7 +6,7 @@ declare global {
     name: string,
     description: string,
     filename: string,
-    userCreate: string,
+    userCreation: string,
     userUpdate: string,
     creationTime: string,
     modificationTime: string

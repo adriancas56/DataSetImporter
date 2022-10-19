@@ -1,35 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeMount } from 'vue'
-definePageMeta({
-    title: "Events History"
-})
-
-
-const dateCleaner = (array): void => {
-    array.map((elem) => {
-        elem.creationDate = new Date(elem.creationTime).toDateString()
-        elem.creationTime = dateFormatter(elem.creationTime)
-  }) 
+import {computed, onMounted} from 'vue'
+interface IEventsItemTable extends IEventsItem {
+    creationDate: string
 }
+const props = defineProps<{
+    events: IEventsItemTable[]
+    }>()
 
-
-const page = ref(1)
-const limit = ref(12)
-const events = ref(null)
 const expand = ref({})
 
-const getEventsData = async () => {
-    const { data, pending, error } = await useFetch<IEventsItem[]>(`/api/v2/Events/${page.value}/${limit.value}`, { initialCache: false })
-    data.value.forEach((x) => expand.value[x._id] = false)
-    events.value = data.value
-    dateCleaner(events.value)
+const getEventsIdBoolDict = () => {
+    const boolDict = {}
+    props.events.forEach((x) => boolDict[x._id] = false)
+    return boolDict
 }
 
 const expandItem = (id: string) => {
+    console.log(expand)
     expand.value[id] = !expand.value[id]
 }
-
-
 const onExpandItems = (isExpansion: boolean) => {
     if (isExpansion) {
         for (const key in expand.value) { expand.value[key] = true }
@@ -38,14 +27,13 @@ const onExpandItems = (isExpansion: boolean) => {
     }
 }
 
-getEventsData()
-
+onMounted(()=> {
+    expand.value = getEventsIdBoolDict()
+})
 </script>
 
-
 <template>
-    <div class="bg-white p-8 rounded-md w-full">
-        <div class="flex justify-end gap-x-4 pb-3">
+    <div class="flex justify-end gap-x-4 pb-3">
             <button @click="onExpandItems(true)" class="bg-gray-900 text-white text-sm rounded py-1 px-2 hover:bg-gray-500" >Expand All</button>
             <button @click="onExpandItems(false)" class="bg-gray-900 text-white text-sm rounded py-1 px-2 hover:bg-gray-500">Close All</button>
         </div>
@@ -80,7 +68,7 @@ getEventsData()
                     </button>
                 </div>
 
-                <div v-if="expand[event._id]" class="col-span-full px-6 pb-2">
+                <div v-if="expand[event._id]" class="col-span-full px-6 pb-2 ">
                     <div class="flex justify-between">
                         <div>
                             <p>
@@ -116,8 +104,4 @@ getEventsData()
 
             </div>
         </template>
-    </div>
 </template>
-
-
-
