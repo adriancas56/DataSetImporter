@@ -160,7 +160,7 @@ const uploadCategory = async () => {
     categoryError.value = response.value.message
     showCategoryErrors.value = true
   }
-  if (response.value.warnings) {
+  if (response.value.warnings.length > 0) {
     categoryWarnings.value = response.value.warnings
     showCategoryWarnings.value= true
   }
