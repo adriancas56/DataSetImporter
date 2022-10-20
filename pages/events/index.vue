@@ -49,7 +49,7 @@ getEventsData()
             <button @click="onExpandItems(true)" class="bg-gray-900 text-white text-sm rounded py-1 px-2 hover:bg-gray-500" >Expand All</button>
             <button @click="onExpandItems(false)" class="bg-gray-900 text-white text-sm rounded py-1 px-2 hover:bg-gray-500">Close All</button>
         </div>
-
+        
         <div class="grid grid-cols-12 gap-x-2 gap-y-0 border-b-2 border-gray-200 text-left text-xs font-bold text-gray-700 uppercase">
             <div class="px-2 py-3 col-span-5">Spreadsheet</div>
             <div class="py-3 col-span-2">Execution Date</div>
@@ -59,21 +59,23 @@ getEventsData()
         </div>
 
         <template v-for="event in events" :key="event._id">
-            <div class="grid grid-cols-12 gap-x-2 gap-y-0 bg-white border-b border-gray-200 text-sm text-gray-900 whitespace-no-wrap hover:bg-gray-100">
-                <div class="px-2 py-3 col-span-5 cursor-pointer" @click="expandItem(event._id)">
+            <div @click="expandItem(event._id)" class="grid grid-cols-12 gap-x-2 gap-y-0 bg-white border-b border-gray-200 text-sm text-gray-900 whitespace-no-wrap hover:bg-gray-100">
+                <div class="px-2 py-3 col-span-5 cursor-pointer">
                     <p>{{event.filename}}</p>
                 </div>
                 <div class="py-3 col-span-2">
                     <p>{{event.creationDate}}</p>
                 </div>
-                <div class="py-3 col-span-1">
-                    <p>{{event.executionType}}</p>
+                <div class="py-2 col-span-1">
+                    <p class="bg-green-500 max-w-fit p-1 rounded-full text-white"
+                    :class="{'bg-gray-900': event.executionType == 'update', 'bg-red-500': event.executionType == 'error'}"
+                    >{{event.executionType}}</p>
                 </div>
                 <div class="pt-3 col-span-3">
                     <p>{{event.categoryName}}</p>
                 </div>
                 <div class="text-center py-1 col-span-1">
-                    <button @click="expandItem(event._id)" class="hover:bg-white p-1 rounded-full" :class="{'rotate-180': expand[event._id]}">
+                    <button class="hover:bg-white p-1 rounded-full" :class="{'rotate-180': expand[event._id]}">
                         <svg style="width:24px;height:24px" viewBox="0 0 24 24">
                             <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
                         </svg>

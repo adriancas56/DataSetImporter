@@ -109,7 +109,7 @@
             </button>
         </div>
             
-        <div class="p-4 shadow bg-gray-100">
+        <div class="p-4 shadow bg-gray-50">
             <h2 class="text-xl font-bold pt-2">Events History</h2>
             <EventsTable :events="events"></EventsTable>
         </div>

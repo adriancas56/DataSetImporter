@@ -47,8 +47,8 @@ onMounted(()=> {
         </div>
 
         <template v-for="event in events" :key="event._id">
-            <div class="grid grid-cols-12 gap-x-2 gap-y-0 bg-white border-b border-gray-200 text-sm text-gray-900 whitespace-no-wrap hover:bg-gray-100">
-                <div class="px-2 py-3 col-span-5 cursor-pointer" @click="expandItem(event._id)">
+            <div @click="expandItem(event._id)" class="grid grid-cols-12 gap-x-2 gap-y-0 bg-white border-b border-gray-200 text-sm text-gray-900 whitespace-no-wrap hover:bg-gray-100">
+                <div class="px-2 py-3 col-span-5 cursor-pointer">
                     <p>{{event.filename}}</p>
                 </div>
                 <div class="py-3 col-span-2">
@@ -61,14 +61,14 @@ onMounted(()=> {
                     <p>{{event.categoryName}}</p>
                 </div>
                 <div class="text-center py-1 col-span-1">
-                    <button @click="expandItem(event._id)" class="hover:bg-white p-1 rounded-full" :class="{'rotate-180': expand[event._id]}">
+                    <button class="hover:bg-white p-1 rounded-full" :class="{'rotate-180': expand[event._id]}">
                         <svg style="width:24px;height:24px" viewBox="0 0 24 24">
                             <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
                         </svg>
                     </button>
                 </div>
 
-                <div v-if="expand[event._id]" class="col-span-full px-6 pb-2 ">
+                <div v-if="expand[event._id]" class="col-span-full px-6 pb-2 " @click="expandItem(event._id)">
                     <div class="flex justify-between">
                         <div>
                             <p>

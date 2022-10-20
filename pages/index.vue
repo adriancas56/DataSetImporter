@@ -87,14 +87,16 @@
 <template>
     <div class="bg-white p-8 mb-4 rounded-2xl">
         <h1 class="text-3xl">Welcome</h1>
-        <div>
-
-            <button @click="showCategoryUpload = true" class="flex space-x-1 p-2 rounded-md  tracking-wide hover:text-white hover:bg-green-500 bg-gray-100 cursor-pointer hover:scale-110 ease-in-out delay-50 duration-500">
-            <svg style="width:24px;height:24px" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.8,20H14L12,16.6L10,20H8.2L11.1,15.5L8.2,11H10L12,14.4L14,11H15.8L12.9,15.5L15.8,20M13,9V3.5L18.5,9H13Z" />
-            </svg>
-            <span>Create Category</span>
-          </button>
+        <div class="flex space-x-4 py-6 items-center">
+            <p>Want to create a new category? </p>
+            <div>
+                <button @click="showCategoryUpload = true" class="flex space-x-1 p-2 rounded-md  tracking-wide hover:text-white hover:bg-green-500 bg-gray-100 cursor-pointer hover:scale-110 ease-in-out delay-50 duration-500">
+                    <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.8,20H14L12,16.6L10,20H8.2L11.1,15.5L8.2,11H10L12,14.4L14,11H15.8L12.9,15.5L15.8,20M13,9V3.5L18.5,9H13Z" />
+                    </svg>
+                    <span>Create Category</span>
+                </button>
+            </div>
         </div>
         <div class="p-4 bg-gray-50 shadow">
             <p class="text-xl">Latest Category Uploads</p>
